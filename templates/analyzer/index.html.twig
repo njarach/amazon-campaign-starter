@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Analyseur de mots-clés Amazon</h2>
+
+                    <form hx-post="{{ path('app_analyze') }}"
+                          hx-target="#results"
+                          hx-indicator="#loading">
+                        <div class="mb-3">
+                            <label for="asin" class="form-label">Code ASIN</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="asin"
+                                   name="asin"
+                                   placeholder="Ex: B08N5WRWNW"
+                                   required>
+                            <div class="form-text">
+                                Entrez un code ASIN Amazon pour analyser les 10 premiers résultats
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            Analyser
+                        </button>
+
+                        <div id="loading" class="htmx-indicator ms-2">
+                            <span class="spinner-border spinner-border-sm"></span>
+                            Analyse en cours...
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="results" class="mt-4"></div>
+        </div>
+    </div>
+
+    <style>
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+    </style>
+{% endblock %}
