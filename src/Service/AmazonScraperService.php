@@ -5,63 +5,33 @@ namespace App\Service;
 class AmazonScraperService
 {
     public function __construct(
-        private readonly FirecrawlService $firecrawlService
+        private readonly FirecrawlService $firecrawlService,
+        private readonly KeywordExtractorService $keywordExtractor
     ) {}
 
-
-    public function searchByAsin(string $asin): array
+    public function findCoreKeyWordByAsin(string $asin): array
     {
-        $searchUrl = "https://www.amazon.fr/s?k={$asin}";
-
-        $data = $this->firecrawlService->scrapeUrl($searchUrl);
-
-        return $this->extractProductUrls($data, 10);
+        $searchUrl = "https://www.amazon.fr/dp/{$asin}";
+        $result = $this->firecrawlService->scrapeAsinProductPage($searchUrl);
+        $productTitle = $result["data"]["metadata"]["title"];
+        return $this->keywordExtractor->extractCoreKeywordFromProductTitle($productTitle);
     }
 
-    public function getProductsDetails(array $productUrls): array
+    public function mapProductPagesFoundFromCoreKeywords(string $coreKeywords): array
     {
-        $results = $this->firecrawlService->batchScrape($productUrls);
+        $url = "https://www.amazon.fr/s?k=$coreKeywords";
+        $productPagesFound = $this->firecrawlService->mapProductPagesFromResearch($url);
+        $html = $productPagesFound['data']['html'] ?? '';
 
-        return array_map(function($result) {
-            $markdown = $result['data']['markdown'] ?? '';
-            return $this->extractRelevantContent($markdown);
-        }, $results);
+        preg_match_all('/role="listitem"[^>]*data-asin="([A-Z0-9]{10})"/', $html, $matches);
+
+        $asins = array_slice(array_unique($matches[1]), 0, 5);
+
+        return array_map(fn($asin) => "https://www.amazon.fr/dp/{$asin}", $asins);
     }
 
-    private function extractProductUrls(array $scrapedData, int $limit): array
+    public function batchScrapeProductPages(array $searchUrls)
     {
-        $markdown = $scrapedData['data']['markdown'] ?? '';
-
-        preg_match_all('/\/dp\/([A-Z0-9]{10})/', $markdown, $matches);
-
-        $asins = array_unique(array_slice($matches[1], 0, $limit));
-
-        $urls = [];
-        foreach ($asins as $asin) {
-            $urls[] = "https://www.amazon.fr/dp/{$asin}";
-        }
-
-        return $urls;
-    }
-
-    private function extractRelevantContent(string $markdown): string
-    {
-        $content = [];
-
-        if (preg_match('/^#\s+(.+?)$/m', $markdown, $match)) {
-            $content[] = "Titre: " . trim($match[1]);
-        }
-
-        if (preg_match('/(?:Description|À propos|About).{0,50}?\n+(.*?)(?:\n#{1,2}|$)/si', $markdown, $match)) {
-            $desc = trim($match[1]);
-            $content[] = "Description: " . substr($desc, 0, 500);
-        }
-
-        if (preg_match_all('/^\s*[-*]\s+(.+)$/m', $markdown, $matches)) {
-            $features = array_slice($matches[1], 0, 10);
-            $content[] = "Caractéristiques: " . implode('. ', $features);
-        }
-
-        return implode("\n\n", $content);
+        return $this->firecrawlService->batchScrapeProductPages($searchUrls);
     }
 }

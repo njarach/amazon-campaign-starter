@@ -13,7 +13,7 @@ class FirecrawlService
         private readonly string $apiKey
     ) {}
 
-    public function scrapeUrl(string $url): array
+    public function scrapeAsinProductPage(string $url): array
     {
         $response = $this->httpClient->request('POST', self::API_URL . '/scrape', [
             'headers' => [
@@ -22,23 +22,67 @@ class FirecrawlService
             ],
             'json' => [
                 'url' => $url,
-                'formats' => ['markdown', 'html'],
+                'location' => ['country' => 'FR'],
+                'includeTags' => ['#productTitle', '#feature-bullets'],
+                'onlyMainContent' => true
             ]
-        ] );
+        ]);
 
         return $response->toArray();
     }
 
-    public function batchScrape(array $urls): array
+    public function mapProductPagesFromResearch(string $url): array
+    {
+        $response = $this->httpClient->request('POST', self::API_URL . '/scrape', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json'
+            ],
+            'json' => [
+                'url' => $url,
+                'location' => ['country' => 'FR'],
+//                'includeTags' => ['#productTitle', '#feature-bullets'],
+                'onlyMainContent' => true,
+                'formats'=>[
+                    'html'
+                ]
+            ]
+        ]);
+
+        return $response->toArray();
+    }
+
+    public function batchScrapeProductPages(array $searchUrls): array
     {
         $results = [];
-        foreach ($urls as $url) {
-            try {
-                $results[] = $this->scrapeUrl($url);
-            } catch (\Exception $e) {
+        foreach ($searchUrls as $url) {
+            $response = $this->httpClient->request('POST', self::API_URL . '/scrape', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json'
+                ],
+                'json' => [
+                    'url' => $url,
+                    'location' => ['country' => 'FR'],
+                    'includeTags' => ['#productTitle', '#feature-bullets'],
+                    'onlyMainContent' => true,
+                ]
+            ]);
+
+            if ($response->getStatusCode() === 500) {
+                echo "⚠️  500 error on $url - skipping\n";
                 continue;
             }
+
+            $results[] = $response->toArray();
+            sleep(2);
         }
-        return $results;
+
+        return array_map(function ($item) {
+            $metadata = $item['data']['markdown'] ?? [];
+            return [
+                $metadata
+            ];
+        }, $results);
     }
 }

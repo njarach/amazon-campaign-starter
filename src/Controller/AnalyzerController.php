@@ -11,13 +11,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class AnalyzerController extends AbstractController
 {
-    private AmazonScraperService $amazonScraper;
-    private KeywordExtractorService $keywordExtractor;
-    public function __construct(AmazonScraperService $amazonScraper, KeywordExtractorService $keywordExtractor)
-    {
-        $this->amazonScraper = $amazonScraper;
-        $this->keywordExtractor = $keywordExtractor;
-    }
+    public function __construct(private AmazonScraperService $amazonScraper, private readonly KeywordExtractorService $keywordExtractorService) {}
 
     #[Route('/analyzer', name: 'app_home', methods: ['GET'])]
     public function index(): Response
@@ -37,15 +31,14 @@ final class AnalyzerController extends AbstractController
         }
 
         try {
-            $productUrls = $this->amazonScraper->searchByAsin($asin);
-
-            $productsData = $this->amazonScraper->getProductsDetails($productUrls);
-
-            $keywords = $this->keywordExtractor->extractKeywords($productsData);
-
+            $coreKeywordsResult = $this->amazonScraper->findCoreKeyWordByAsin($asin)['keyword'];
+            $productPagesLinks = $this->amazonScraper->mapProductPagesFoundFromCoreKeywords($coreKeywordsResult);
+            $batchScrapedProductPages = $this->amazonScraper->batchScrapeProductPages($productPagesLinks);
+            $amazingKeywords = $this->keywordExtractorService->findThoseDamnedKeywordsInAStrangeAndCoolWay($batchScrapedProductPages);
             return $this->render('analyzer/_analyzer_results.html.twig', [
-                'keywords' => $keywords,
-                'productsCount' => count($productsData)
+//                'keywords' => $result['keywords'],
+//                'productsCount' => $result['productsCount']
+            'results' => $amazingKeywords
             ]);
 
         } catch (\Exception $e) {

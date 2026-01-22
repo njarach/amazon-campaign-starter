@@ -2,6 +2,11 @@
 
 namespace App\Service;
 
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class KeywordExtractorService
@@ -11,26 +16,41 @@ class KeywordExtractorService
         private string $openaiApiKey
     ) {}
 
-    public function extractKeywords(array $productsContent, int $limit = 50): array
+    public function extractCoreKeywordFromProductTitle(string $productTitle): array
     {
-        $allContent = implode("\n\n---\n\n", $productsContent);
+        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver le mot clé sans nom de marque pour ce produit : $productTitle.
+        Tu me fais un retour en json uniquement.
+        CRITÈRES :
+        - Mot-clé que les acheteurs tapent réellement sur Amazon, dans la barre de recherche.
+        - Terme de recherche à fort potentiel de conversion";
 
-        $prompt = "Tu es un expert Amazon Ads. Analyse ces 10 fiches produits et extrais les {$limit} meilleurs mots-clés pour des campagnes publicitaires Amazon.
+        return $this->promptGipidyForKeywords($prompt);
+    }
 
-CRITÈRES :
-- Mots-clés que les acheteurs tapent réellement sur Amazon
-- Termes de recherche à fort potentiel de conversion
-- Mixe de mots-clés génériques, spécifiques et de marque
-- Élimine les stop words et termes non pertinents
-- Privilégie les termes commerciaux (ex: \"acheter\", \"meilleur\", \"pas cher\")
+    public function findThoseDamnedKeywordsInAStrangeAndCoolWay(array $batchScrapedProductPages)
+    {
+        $productsJson = json_encode($batchScrapedProductPages, JSON_UNESCAPED_UNICODE);
+        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver les 20 mots clé sans nom de marque pour ces produits dont je te donne les titres et
+        descriptions : $productsJson.
+        Tu me fais un retour en json uniquement.
+        CRITÈRES :
+        - Mots-clé que les acheteurs tapent réellement sur Amazon, dans la barre de recherche.
+        - Termes de recherche à fort potentiel de conversion";
 
-CONTENU DES PRODUITS :
-{$allContent}
+        return $this->promptGipidyForKeywords($prompt);
+    }
 
-Réponds UNIQUEMENT avec un JSON : {\"mot-clé\": score_pertinence}
-Score de 1 à 100 (100 = très pertinent pour Amazon Ads).
-Trie par score décroissant.";
-
+    /**
+     * @param string $prompt
+     * @return array|mixed
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    private function promptGipidyForKeywords(string $prompt): mixed
+    {
         $response = $this->httpClient->request('POST', 'https://api.openai.com/v1/chat/completions', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->openaiApiKey,
@@ -46,7 +66,7 @@ Trie par score décroissant.";
                     ['role' => 'user', 'content' => $prompt]
                 ],
                 'temperature' => 0.2,
-                'max_tokens' => 1500,
+                'max_tokens' => 800,
             ]
         ]);
 
