@@ -27,15 +27,18 @@ class KeywordExtractorService
         return $this->promptGipidyForKeywords($prompt);
     }
 
-    public function findThoseDamnedKeywordsInAStrangeAndCoolWay(array $batchScrapedProductPages)
+    public function askGipidyForTheKeywords(array $batchScrapedProductPages)
     {
         $productsJson = json_encode($batchScrapedProductPages, JSON_UNESCAPED_UNICODE);
         $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver les 20 mots clé sans nom de marque pour ces produits dont je te donne les titres et
         descriptions : $productsJson.
-        Tu me fais un retour en json uniquement.
+        Réponds UNIQUEMENT avec un JSON : {\"mot-clé\": score_pertinence}
+        Score de 1 à 100 (100 = très pertinent pour Amazon Ads).
+        Trie par score décroissant.
         CRITÈRES :
         - Mots-clé que les acheteurs tapent réellement sur Amazon, dans la barre de recherche.
-        - Termes de recherche à fort potentiel de conversion";
+        - Termes de recherche à fort potentiel de conversion.
+        - Utilise quelques données techniques selon les produits si présentes dans le titre ou la description : dimensions, performances.";
 
         return $this->promptGipidyForKeywords($prompt);
     }

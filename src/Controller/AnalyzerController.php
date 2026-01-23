@@ -34,11 +34,10 @@ final class AnalyzerController extends AbstractController
             $coreKeywordsResult = $this->amazonScraper->findCoreKeyWordByAsin($asin)['keyword'];
             $productPagesLinks = $this->amazonScraper->mapProductPagesFoundFromCoreKeywords($coreKeywordsResult);
             $batchScrapedProductPages = $this->amazonScraper->batchScrapeProductPages($productPagesLinks);
-            $amazingKeywords = $this->keywordExtractorService->findThoseDamnedKeywordsInAStrangeAndCoolWay($batchScrapedProductPages);
+            $amazingKeywords = $this->keywordExtractorService->askGipidyForTheKeywords($batchScrapedProductPages);
             return $this->render('analyzer/_analyzer_results.html.twig', [
-//                'keywords' => $result['keywords'],
-//                'productsCount' => $result['productsCount']
-            'results' => $amazingKeywords
+                'keywords' => $amazingKeywords,
+                'productsCount' => count($batchScrapedProductPages)
             ]);
 
         } catch (\Exception $e) {
