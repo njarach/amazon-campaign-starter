@@ -37,7 +37,9 @@ final class AnalyzerController extends AbstractController
             $amazingKeywords = $this->keywordExtractorService->askGipidyForTheKeywords($batchScrapedProductPages);
             return $this->render('analyzer/_analyzer_results.html.twig', [
                 'keywords' => $amazingKeywords,
-                'productsCount' => count($batchScrapedProductPages)
+                'productsCount' => count($batchScrapedProductPages),
+                'asin'=>$asin,
+                'coreKeywords'=>$coreKeywordsResult,
             ]);
 
         } catch (\Exception $e) {

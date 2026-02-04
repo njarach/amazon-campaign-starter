@@ -76,7 +76,6 @@ class SymfonyCrawlerScraper implements ScraperInterface
             try {
                 $productData = $this->scrapeProductPage($url);
 
-                // Texte brut pour OpenAI : titre + bullets
                 $text = $productData['title'];
                 if (!empty($productData['bullets'])) {
                     $text .= ' ' . implode(' ', $productData['bullets']);
@@ -84,8 +83,7 @@ class SymfonyCrawlerScraper implements ScraperInterface
 
                 $results[] = [$text];
 
-                // Anti-blocage : pause entre requêtes
-                sleep(2);
+                sleep(1);
             } catch (\Exception $e) {
                 echo "⚠️  Erreur sur $url - skipping: " . $e->getMessage() . "\n";
                 continue;

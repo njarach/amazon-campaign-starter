@@ -9,34 +9,56 @@
             <h5 class="mt-4 mb-3">Top 50 mots-clés</h5>
 
             <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Mot-clé</th>
-                        <th>Pertinence</th>
-                        <th>Score</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for keyword, frequency in keywords %}
+                <form action="{{ path('app_create_bulksheet') }}" method="get">
+                    <input type="text" value="{{ asin }}" name="asin">
+                    <input type="text" value="" placeholder="0.35" name="auto_bid">
+                    <input type="text" value="{{ coreKeywords }}" placeholder="0.35" name="campaign_id">
+                    <button type="submit" class="btn btn-success">Créer</button>
+                    <table class="table">
+                        <thead>
                         <tr>
-                            <td>{{ loop.index }}</td>
-                            <td><strong>{{ keyword }}</strong></td>
-                            <td>{{ frequency }}</td>
-                            <td>
-                                <div class="progress" style="width: 100px;">
-                                    <div class="progress-bar"
-                                         role="progressbar"
-                                         style="width: {{ (frequency / keywords|first) * 100 }}%">
-                                    </div>
-                                </div>
-                            </td>
+                            <th>#</th>
+                            <th>Mot-clé</th>
+                            <th>Pertinence</th>
+                            <th>Score</th>
+                            <th class="table-secondary">
+                                <input onclick="toggle(this)" type="checkbox" class="form-check-input" value="">
+                            </th>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {% for keyword, frequency in keywords %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td><strong>{{ keyword }}</strong></td>
+                                <td>{{ frequency }}</td>
+                                <td>
+                                    <div class="progress" style="width: 100px;">
+                                        <div class="progress-bar"
+                                             role="progressbar"
+                                             style="width: {{ (frequency / keywords|first) * 100 }}%">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="table-secondary">
+                                    <input type="checkbox" class="form-check-input" value="{{ keyword }}" name="keywords[]">
+                                    <input type="hidden" class="form-check-input" value="{{ frequency }}" name="frequency[]">
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
             </div>
         </div>
     </div>
+
+    <script>
+        function toggle(source) {
+            let checkboxes = document.getElementsByName('keywords[]');
+            for (let checkbox in checkboxes) {
+                checkboxes[checkbox].checked = source.checked
+            }
+        }
+    </script>
 {% endif %}
