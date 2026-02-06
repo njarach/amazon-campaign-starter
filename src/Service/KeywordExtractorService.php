@@ -27,7 +27,7 @@ readonly class KeywordExtractorService
     public function askGipidyForTheKeywords(string $productTitle, array $batchScrapedProductPages)
     {
         $productsJson = json_encode($batchScrapedProductPages, JSON_UNESCAPED_UNICODE);
-        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver les 40 mots-clé sans nom de marque pour ces produits dont je te donne les titres et
+        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver 20 mots-clé exactement sans nom de marque pour ces produits dont je te donne les titres et
         descriptions : $productsJson.
         Réponds UNIQUEMENT avec un JSON : {\"mot-clé\": score_pertinence}
         Score de 1 à 100 (100 = très pertinent pour Amazon Ads).
@@ -37,7 +37,7 @@ readonly class KeywordExtractorService
         - Commence avec des mots clés génériques utilisés notamment dans le titre du produit : $productTitle,
         - Poursuis par des mots-clé très génériques et communs utilisés pour le type de produit,
         - Termes de recherche à fort potentiel de conversion,
-        - Évite les mots de liaison tels que 'et','pou','avec',
+        - Évite les mots de liaison tels que 'et','pour','avec',
         - Utilise quelques données techniques selon les produits si présentes dans le titre ou la description : dimensions, performances.";
 
         return $this->promptGipidyForKeywords($prompt);
