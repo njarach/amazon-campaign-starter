@@ -3,63 +3,93 @@
 {% else %}
     <div class="card">
         <div class="card-body">
-            <h4 class="card-title">Résultats de l'analyse</h4>
-            <p class="text-muted">{{ productsCount }} produits analysés</p>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="card-title mb-1">Mots-clés pour votre campagne</h4>
+                    <p class="text-muted">{{ productsCount }} produits analysés</p>
+                </div>
+                <a href="{{ path('app_keywords_finder') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Nouveau produit
+                </a>
+            </div>
 
-            <h5 class="mt-4 mb-3">Top 50 mots-clés</h5>
+            {{ form_start(form, {'action': path('app_create_bulksheet'), 'method': 'POST'}) }}
+
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    {{ form_row(form.asin) }}
+                </div>
+                <div class="col-md-3">
+                    {{ form_row(form.sku) }}
+                </div>
+                <div class="col-md-3">
+                    {{ form_row(form.campaignId) }}
+                </div>
+                <div class="col-md-3">
+                    {{ form_row(form.autobid) }}
+                </div>
+            </div>
+
+            <h5 class="mt-4 mb-3">Mots-clés découverts ({{ form.keywords|length }})</h5>
 
             <div class="table-responsive">
-                <form action="{{ path('app_create_bulksheet') }}" method="get">
-                    <input type="text" value="{{ asin }}" name="asin">
-                    <input type="text" value="" name="sku" placeholder="Si vous êtes vendeur, merci de renseigner un SKU. Sinon laisser vide.">
-                    <input type="text" value="0.35" placeholder="0.35" name="auto_bid">
-                    <input type="text" value="{{ coreKeywords }}" placeholder="0.35" name="campaign_id">
-                    <button type="submit" class="btn btn-success">Créer</button>
-                    <table class="table">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Mot-clé</th>
-                            <th>Pertinence</th>
-                            <th>Score</th>
-                            <th class="table-secondary">
-                                <input onclick="toggle(this)" type="checkbox" class="form-check-input" value="">
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for keyword, frequency in keywords %}
-                            <tr>
-                                <td>{{ loop.index }}</td>
-                                <td><strong>{{ keyword }}</strong></td>
-                                <td>{{ frequency }}</td>
-                                <td>
-                                    <div class="progress" style="width: 100px;">
-                                        <div class="progress-bar"
-                                             role="progressbar"
-                                             style="width: {{ (frequency / keywords|first) * 100 }}%">
-                                        </div>
+                <table class="table table-hover" id="keywords-table">
+                    <thead>
+                    <tr>
+                        <th style="width: 50px">#</th>
+                        <th>Mot-clé</th>
+                        <th style="width: 120px">Score</th>
+                        <th style="width: 150px">Pertinence</th>
+                        <th style="width: 100px">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for keyword in form.keywords %}
+                        <tr data-index="{{ loop.index0 }}">
+                            <td>{{ loop.index }}</td>
+                            <td>{{ form_widget(keyword.text) }}</td>
+                            <td>{{ form_widget(keyword.score) }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar"
+                                         role="progressbar"
+                                         style="width: {{ keyword.score.vars.value }}%">
                                     </div>
-                                </td>
-                                <td class="table-secondary">
-                                    <input type="checkbox" class="form-check-input" value="{{ keyword }}" name="keywords[]">
-                                    <input type="hidden" class="form-check-input" value="{{ frequency }}" name="frequency[]">
-                                </td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </form>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-danger delete-keyword"
+                                        data-index="{{ loop.index0 }}">
+                                    Supprimer
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
+
+            <div class="mt-4">
+                {{ form_widget(form.submit) }}
+            </div>
+
+            {{ form_end(form) }}
         </div>
     </div>
 
     <script>
-        function toggle(source) {
-            let checkboxes = document.getElementsByName('keywords[]');
-            for (let checkbox in checkboxes) {
-                checkboxes[checkbox].checked = source.checked
-            }
-        }
+        document.querySelectorAll('.delete-keyword').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('tr');
+                const index = this.dataset.index;
+
+                row.style.display = 'none';
+
+                row.querySelectorAll('input').forEach(input => {
+                    input.disabled = true;
+                });
+            });
+        });
     </script>
 {% endif %}

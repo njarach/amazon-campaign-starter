@@ -5,9 +5,9 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-body">
-                    <h2 class="card-title mb-4">Analyseur de mots-clés Amazon</h2>
+                    <h2 class="card-title mb-4">Trouver les mots clés</h2>
 
-                    <form hx-post="{{ path('app_analyze') }}"
+                    <form hx-post="{{ path('app_find_keywords') }}"
                           hx-target="#results"
                           hx-indicator="#loading">
                         <div class="mb-3">

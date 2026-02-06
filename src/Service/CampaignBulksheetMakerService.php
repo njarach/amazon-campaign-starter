@@ -8,20 +8,6 @@ use Symfony\Component\HttpFoundation\Request;
 
 class CampaignBulksheetMakerService
 {
-    private BulksheetFactory $factory;
-    public function __construct(BulksheetFactory $factory)
-    {
-        $this->factory = $factory;
-    }
-
-    public function createBulksheet(Request $request): Bulksheet
-    {
-        $bulksheet = $this->factory->createFromRequest($request);
-
-        $this->generateCampaigns($bulksheet);
-
-        return $bulksheet;
-    }
 
     public function generateCampaigns(Bulksheet $bulksheet): Bulksheet
     {

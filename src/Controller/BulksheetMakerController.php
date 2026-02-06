@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\DTO\Bulksheet;
+use App\Form\BulksheetType;
 use App\Service\CampaignBulksheetMakerService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,19 +19,34 @@ final class BulksheetMakerController extends AbstractController
     }
 
     #[Route('/bulksheet/create', name: 'app_create_bulksheet')]
-    public function index(Request $request): Response
+    public function create(Request $request): Response
     {
-        $bulksheetData = $this->bulksheetMakerService->createBulksheet($request);
-        $bulksheet = $this->bulksheetMakerService->generateCampaigns($bulksheetData);
+        $form = $this->createForm(BulksheetType::class);
+        $form->handleRequest($request);
 
-        $filepath = $this->getParameter('kernel.project_dir') . '/var/tmp/amazon_campaign.csv';
-        $dir = dirname($filepath);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+        if (!$form->isValid()) {
+            return $this->redirectToRoute('app_home');
         }
 
+        $data = $form->getData();
+
+        $keywords = array_filter(
+            array_map(fn($kw) => $kw['text'] ?? null, $data['keywords']),
+            fn($kw) => !empty($kw)
+        );
+
+        $bulksheet = new Bulksheet();
+        $bulksheet->setKeywords(array_values($keywords));
+        $bulksheet->setAsin($data['asin']);
+        $bulksheet->setCampaignId($data['campaignId']);
+        $bulksheet->setAutobid($data['autobid']);
+        $bulksheet->setSku($data['sku']);
+
+        $bulksheet = $this->bulksheetMakerService->generateCampaigns($bulksheet);
+
+        $filepath = $this->getParameter('kernel.project_dir') . '/var/tmp/amazon_campaign.csv';
         $this->bulksheetMakerService->exportToCsv($bulksheet, $filepath);
 
-        return $this->file($filepath, 'amazon_campaign_' . date('Ymd') . '.csv');
+        return $this->file($filepath, 'adlance_campaign_' . date('Ymd_His') . '.csv');
     }
 }

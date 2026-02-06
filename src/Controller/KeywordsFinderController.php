@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Form\BulksheetType;
 use App\Service\AmazonScraperService;
 use App\Service\KeywordExtractorService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -9,37 +10,46 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
-final class AnalyzerController extends AbstractController
+final class KeywordsFinderController extends AbstractController
 {
     public function __construct(private AmazonScraperService $amazonScraper, private readonly KeywordExtractorService $keywordExtractorService) {}
 
-    #[Route('/analyzer', name: 'app_home', methods: ['GET'])]
-    public function index(): Response
+    #[Route('/finder', name: 'app_keywords_finder', methods: ['GET'])]
+    public function home(): Response
     {
         return $this->render('analyzer/index.html.twig');
     }
 
-    #[Route('/analyze', name: 'app_analyze', methods: ['POST'])]
-    public function analyze(Request $request): Response
+    #[Route('/find/keywords', name: 'app_find_keywords', methods: ['POST'])]
+    public function findKeywords(Request $request): Response
     {
         $asin = $request->request->get('asin');
 
         if (!$asin) {
             return $this->render('analyzer/_analyzer_results.html.twig', [
-                'error' => 'Veuillez entrer un code ASIN'
+                'error' => 'Veuillez entrer un code ASIN.'
             ]);
         }
 
         try {
-            $coreKeywordsResult = $this->amazonScraper->findCoreKeyWordByAsin($asin)['keyword'];
+            $coreKeywordsResult = $this->amazonScraper->findCoreKeyWordByAsin($asin)['title'];
             $productPagesLinks = $this->amazonScraper->mapProductPagesFoundFromCoreKeywords($coreKeywordsResult);
             $batchScrapedProductPages = $this->amazonScraper->batchScrapeProductPages($productPagesLinks);
-            $amazingKeywords = $this->keywordExtractorService->askGipidyForTheKeywords($batchScrapedProductPages);
+            $amazingKeywords = $this->keywordExtractorService->askGipidyForTheKeywords($coreKeywordsResult, $batchScrapedProductPages);
+
+            $formData = [
+              'asin' => $asin,
+              'campaignId' => $coreKeywordsResult,
+              'autobid' => 0.35,
+              'keywords' => array_map(
+                  fn($kw,$score) => ['text' => $kw, 'score' => $score], array_keys($amazingKeywords),$amazingKeywords)
+            ];
+
+            $form = $this->createForm(BulksheetType::class, $formData);
+
             return $this->render('analyzer/_analyzer_results.html.twig', [
-                'keywords' => $amazingKeywords,
+                'form' => $form->createView(),
                 'productsCount' => count($batchScrapedProductPages),
-                'asin'=>$asin,
-                'coreKeywords'=>$coreKeywordsResult,
             ]);
 
         } catch (\Exception $e) {

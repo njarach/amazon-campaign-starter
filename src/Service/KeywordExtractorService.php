@@ -18,26 +18,23 @@ readonly class KeywordExtractorService
 
     public function extractCoreKeywordFromProductTitle(string $productTitle): array
     {
-        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver le mot clé sans nom de marque pour ce produit : $productTitle.
-        Tu me fais un retour en json uniquement.
-        CRITÈRES :
-        - Mot-clé que les acheteurs tapent réellement sur Amazon, dans la barre de recherche.
-        - Terme de recherche à fort potentiel de conversion";
+        $prompt = "Formule un titre pour ce produit, générique et sans nom de marque et qui ne fasse pas plus de 5 mots : $productTitle.
+        Tu me fais un retour en json uniquement.";
 
         return $this->promptGipidyForKeywords($prompt);
     }
 
-    public function askGipidyForTheKeywords(array $batchScrapedProductPages)
+    public function askGipidyForTheKeywords(string $productTitle, array $batchScrapedProductPages)
     {
         $productsJson = json_encode($batchScrapedProductPages, JSON_UNESCAPED_UNICODE);
         $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver les 40 mots-clé sans nom de marque pour ces produits dont je te donne les titres et
         descriptions : $productsJson.
         Réponds UNIQUEMENT avec un JSON : {\"mot-clé\": score_pertinence}
         Score de 1 à 100 (100 = très pertinent pour Amazon Ads).
-        Trie par score décroissant. Ce score est basé sur la fréquence des mots utilisés sur la page du produit, retrouvés dans l'expression 'mot-clé' que tu proposes.
+        Trie par score décroissant. Ce score est basé sur la fréquence des mots utilisés sur la page des produits. Des mots clés similaires ont le même score.
         CRITÈRES :
         - Mots-clé que les acheteurs tapent réellement sur Amazon, dans la barre de recherche,
-        - Commence avec des mots clés très génériques et communs utilisés notamment dans le titre du produit,
+        - Commence avec des mots clés génériques utilisés notamment dans le titre du produit : $productTitle,
         - Poursuis par des mots-clé très génériques et communs utilisés pour le type de produit,
         - Termes de recherche à fort potentiel de conversion,
         - Évite les mots de liaison tels que 'et','pou','avec',
