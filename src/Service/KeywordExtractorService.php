@@ -9,11 +9,11 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class KeywordExtractorService
+readonly class KeywordExtractorService
 {
     public function __construct(
         private HttpClientInterface $httpClient,
-        private string $openaiApiKey
+        private string              $openaiApiKey
     ) {}
 
     public function extractCoreKeywordFromProductTitle(string $productTitle): array
@@ -30,15 +30,16 @@ class KeywordExtractorService
     public function askGipidyForTheKeywords(array $batchScrapedProductPages)
     {
         $productsJson = json_encode($batchScrapedProductPages, JSON_UNESCAPED_UNICODE);
-        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver les 20 mots-clé sans nom de marque pour ces produits dont je te donne les titres et
+        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver les 40 mots-clé sans nom de marque pour ces produits dont je te donne les titres et
         descriptions : $productsJson.
         Réponds UNIQUEMENT avec un JSON : {\"mot-clé\": score_pertinence}
         Score de 1 à 100 (100 = très pertinent pour Amazon Ads).
-        Trie par score décroissant.
+        Trie par score décroissant. Ce score est basé sur la fréquence des mots utilisés sur la page du produit, retrouvés dans l'expression 'mot-clé' que tu proposes.
         CRITÈRES :
         - Mots-clé que les acheteurs tapent réellement sur Amazon, dans la barre de recherche,
-        - Commence par des mots-clé très génériques et communs utilisés pour le type de produit,
-        - Termes de recherche à fort potentiel de conversion.
+        - Commence avec des mots clés très génériques et communs utilisés notamment dans le titre du produit,
+        - Poursuis par des mots-clé très génériques et communs utilisés pour le type de produit,
+        - Termes de recherche à fort potentiel de conversion,
         - Évite les mots de liaison tels que 'et','pou','avec',
         - Utilise quelques données techniques selon les produits si présentes dans le titre ou la description : dimensions, performances.";
 

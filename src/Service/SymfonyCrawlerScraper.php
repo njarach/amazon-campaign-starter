@@ -83,7 +83,6 @@ class SymfonyCrawlerScraper implements ScraperInterface
 
                 $results[] = [$text];
 
-                sleep(1);
             } catch (\Exception $e) {
                 echo "⚠️  Erreur sur $url - skipping: " . $e->getMessage() . "\n";
                 continue;

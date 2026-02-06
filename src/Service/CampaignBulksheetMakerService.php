@@ -3,57 +3,56 @@
 namespace App\Service;
 
 use App\DTO\Bulksheet;
-use App\DTO\BulksheetData;
-use App\DTO\BulksheetDataFactory;
+use App\DTO\BulksheetFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 class CampaignBulksheetMakerService
 {
-    private BulksheetDataFactory $bulksheetDataFactory;
-    public function __construct(BulksheetDataFactory $bulksheetDataFactory)
+    private BulksheetFactory $factory;
+    public function __construct(BulksheetFactory $factory)
     {
-        $this->bulksheetDataFactory = $bulksheetDataFactory;
+        $this->factory = $factory;
     }
 
-    public function getBulksheetDataFromRequest(Request $request): BulksheetData
+    public function createBulksheet(Request $request): Bulksheet
     {
-        return $this->bulksheetDataFactory->createBulksheetData($request);
+        $bulksheet = $this->factory->createFromRequest($request);
+
+        $this->generateCampaigns($bulksheet);
+
+        return $bulksheet;
     }
 
-    public function createBulksheet(BulksheetData $bulksheetData): Bulksheet
+    public function generateCampaigns(Bulksheet $bulksheet): Bulksheet
     {
-        $bulksheet = new Bulksheet();
-        $rows = [];
-
         // ===== CAMPAGNE AUTO =====
-        $autoCampaignId = $bulksheetData->getCampaignId() . ' Auto';
+        $autoCampaignId = $bulksheet->getCampaignId() . ' Auto';
         $autoAdGroupId = $autoCampaignId . ' AG';
 
-        $rows[] = $this->createCampaignRow($autoCampaignId, 'Auto');
-        $rows[] = $this->createAdGroupRow($autoCampaignId, $autoAdGroupId, '0.75');
-        $rows[] = $this->createProductAdRow($autoCampaignId, $autoAdGroupId, $bulksheetData->getAsin());
+        $bulksheet->addRow($this->createCampaignRow($autoCampaignId, 'Auto'));
+        $bulksheet->addRow($this->createAdGroupRow($autoCampaignId, $autoAdGroupId, '0.75'));
+        $bulksheet->addRow($this->createProductAdRow($autoCampaignId, $autoAdGroupId, $bulksheet->getAsin(), $bulksheet->getSku()));
 
-        // 4 product targeting pour auto
+        // 4 product targeting pour auto, voir la doc Amazon
         foreach (['close-match', 'loose-match', 'substitutes', 'complements'] as $expression) {
-            $rows[] = $this->createProductTargetingRow($autoCampaignId, $autoAdGroupId, $expression, '0.75');
+            $bulksheet->addRow($this->createProductTargetingRow($autoCampaignId, $autoAdGroupId, $expression, '0.75'));
         }
 
         // ===== CAMPAGNE MANUAL =====
-        $manualCampaignId = $bulksheetData->getCampaignId() . ' Manual';
+        $manualCampaignId = $bulksheet->getCampaignId() . ' Manual';
         $manualAdGroupId = $manualCampaignId . ' AG';
 
-        $rows[] = $this->createCampaignRow($manualCampaignId, 'Manual');
-        $rows[] = $this->createAdGroupRow($manualCampaignId, $manualAdGroupId, '0.50');
-        $rows[] = $this->createProductAdRow($manualCampaignId, $manualAdGroupId, $bulksheetData->getAsin());
+        $bulksheet->addRow($this->createCampaignRow($manualCampaignId, 'Manual'));
+        $bulksheet->addRow($this->createAdGroupRow($manualCampaignId, $manualAdGroupId, '0.50'));
+        $bulksheet->addRow($this->createProductAdRow($manualCampaignId, $manualAdGroupId, $bulksheet->getAsin(), $bulksheet->getSku()));
 
-        // 20 keywords × 3 match types (exact, phrase, broad)
+        // 20 keywords × 3 match types (exact, phrase, broad), voir la doc Amazon
         foreach (['exact', 'phrase', 'broad'] as $matchType) {
-            foreach ($bulksheetData->getKeywords() as $keyword) {
-                $rows[] = $this->createKeywordRow($manualCampaignId, $manualAdGroupId, $keyword, $matchType);
+            foreach ($bulksheet->getKeywords() as $keyword) {
+                $bulksheet->addRow($this->createKeywordRow($manualCampaignId, $manualAdGroupId, $keyword, $matchType));
             }
         }
 
-        $bulksheet->setRows($rows);
         return $bulksheet;
     }
 
@@ -85,7 +84,7 @@ class CampaignBulksheetMakerService
         ]);
     }
 
-    private function createProductAdRow(string $campaignId, string $adGroupId, string $asin): array
+    private function createProductAdRow(string $campaignId, string $adGroupId, string $asin, string $sku): array
     {
         return array_merge($this->getEmptyRow(), [
             'Entity' => 'Product ad',
@@ -93,7 +92,8 @@ class CampaignBulksheetMakerService
             'Campaign Id' => $campaignId,
             'Ad Group Id' => $adGroupId,
             'State' => 'enabled',
-            'asin' => $asin,
+            'sku' => $sku,
+            'asin' => $asin
         ]);
     }
 

@@ -11,7 +11,8 @@
             <div class="table-responsive">
                 <form action="{{ path('app_create_bulksheet') }}" method="get">
                     <input type="text" value="{{ asin }}" name="asin">
-                    <input type="text" value="" placeholder="0.35" name="auto_bid">
+                    <input type="text" value="" name="sku" placeholder="Si vous êtes vendeur, merci de renseigner un SKU. Sinon laisser vide.">
+                    <input type="text" value="0.35" placeholder="0.35" name="auto_bid">
                     <input type="text" value="{{ coreKeywords }}" placeholder="0.35" name="campaign_id">
                     <button type="submit" class="btn btn-success">Créer</button>
                     <table class="table">

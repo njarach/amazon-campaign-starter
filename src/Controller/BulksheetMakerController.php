@@ -19,8 +19,8 @@ final class BulksheetMakerController extends AbstractController
     #[Route('/bulksheet/create', name: 'app_create_bulksheet')]
     public function index(Request $request): Response
     {
-        $bulksheetData = $this->bulksheetMakerService->getBulksheetDataFromRequest($request);
-        $bulksheet = $this->bulksheetMakerService->createBulksheet($bulksheetData);
+        $bulksheetData = $this->bulksheetMakerService->createBulksheet($request);
+        $bulksheet = $this->bulksheetMakerService->generateCampaigns($bulksheetData);
 
         $filepath = $this->getParameter('kernel.project_dir') . '/var/tmp/amazon_campaign.csv';
         $dir = dirname($filepath);
