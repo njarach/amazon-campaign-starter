@@ -7,7 +7,6 @@ use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints as Assert;
 class KeywordType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -16,10 +15,6 @@ class KeywordType extends AbstractType
             ->add('text', TextType::class, [
                 'label' => false,
                 'attr' => ['class' => 'form-control form-control-sm'],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(max: 255)
-                ]
             ])
             ->add('score', NumberType::class, [
                 'label' => false,

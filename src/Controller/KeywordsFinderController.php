@@ -42,7 +42,7 @@ final class KeywordsFinderController extends AbstractController
               'campaignId' => $coreKeywordsResult,
               'autobid' => 0.35,
               'keywords' => array_map(
-                  fn($kw,$score) => ['text' => $kw, 'score' => $score], array_keys($amazingKeywords),$amazingKeywords)
+                  fn($keyword,$score) => ['text' => $keyword, 'score' => $score], array_keys($amazingKeywords),$amazingKeywords)
             ];
 
             $form = $this->createForm(BulksheetType::class, $formData);

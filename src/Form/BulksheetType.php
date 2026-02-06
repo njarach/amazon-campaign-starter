@@ -25,11 +25,12 @@ class BulksheetType extends AbstractType
                 ]
             ])
             ->add('sku', TextType::class, [
-                'label' => 'Si vous êtes vendeur, vous devez renseigner un SKU.',
-                'attr' => ['readonly' => true, 'class' => 'form-control-plaintext'],
+                'label' => 'SKU',
+                'required' => false,
+                'attr' => ['class' => 'form-control-plaintext'],
             ])
             ->add('campaignId', TextType::class, [
-                'label' => 'ID Campagne',
+                'label' => 'Campaign ID',
                 'attr' => ['class' => 'form-control'],
                 'constraints' => [
                     new Assert\NotBlank(),
@@ -37,7 +38,7 @@ class BulksheetType extends AbstractType
                 ]
             ])
             ->add('autobid', NumberType::class, [
-                'label' => 'Enchère Auto',
+                'label' => 'Auto Bid',
                 'attr' => ['step' => '0.01', 'placeholder' => '0.35', 'class' => 'form-control'],
                 'constraints' => [
                     new Assert\NotBlank(),
@@ -47,15 +48,13 @@ class BulksheetType extends AbstractType
             ])
             ->add('keywords', CollectionType::class, [
                 'entry_type' => KeywordType::class,
-                'allow_add' => false,
+                'allow_add'    => true,
                 'allow_delete' => true,
                 'by_reference' => false,
-                'label' => false,
-                'prototype' => true,
-                'prototype_name' => '__name__'
+                'delete_empty' => false,
             ])
             ->add('submit', SubmitType::class, [
-                'label' => 'Créer le bulksheet',
+                'label' => 'Create',
                 'attr' => ['class' => 'btn btn-success']
             ]);
         ;

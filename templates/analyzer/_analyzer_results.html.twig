@@ -30,45 +30,41 @@
                 </div>
             </div>
 
-            <h5 class="mt-4 mb-3">Mots-clés découverts ({{ form.keywords|length }})</h5>
+            <h5 class="mt-4 mb-3">
+                Mots-clés découverts ({{ form.keywords|length }})
+            </h5>
 
-            <div class="table-responsive">
-                <table class="table table-hover" id="keywords-table">
-                    <thead>
-                    <tr>
-                        <th style="width: 50px">#</th>
-                        <th>Mot-clé</th>
-                        <th style="width: 120px">Score</th>
-                        <th style="width: 150px">Pertinence</th>
-                        <th style="width: 100px">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for keyword in form.keywords %}
-                        <tr data-index="{{ loop.index0 }}">
-                            <td>{{ loop.index }}</td>
-                            <td>{{ form_widget(keyword.text) }}</td>
-                            <td>{{ form_widget(keyword.score) }}</td>
-                            <td>
-                                <div class="progress" style="height: 20px;">
-                                    <div class="progress-bar"
-                                         role="progressbar"
-                                         style="width: {{ keyword.score.vars.value }}%">
-                                    </div>
+            <div class="keywords-list">
+                {% for keyword in form.keywords %}
+                    <div class="keyword-row d-flex align-items-center gap-3 mb-2 p-2 border rounded"
+                         data-index="{{ loop.index0 }}">
+
+                        <div class="keyword-index text-muted" style="width: 30px;">
+                            {{ loop.index }}
+                        </div>
+
+                        <div class="keyword-text flex-grow-1">
+                            {{ form_row(keyword.text) }}
+                        </div>
+
+                        <div class="keyword-score" style="width: 100px;">
+                            {{ form_row(keyword.score) }}
+                        </div>
+
+                        <div class="keyword-progress flex-grow-1">
+                            <div class="progress" style="height: 16px;">
+                                <div
+                                    class="progress-bar"
+                                    role="progressbar"
+                                    style="width: {{ keyword.score.vars.value }}%">
                                 </div>
-                            </td>
-                            <td>
-                                <button type="button"
-                                        class="btn btn-sm btn-outline-danger delete-keyword"
-                                        data-index="{{ loop.index0 }}">
-                                    Supprimer
-                                </button>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
             </div>
+
 
             <div class="mt-4">
                 {{ form_widget(form.submit) }}
@@ -78,18 +74,20 @@
         </div>
     </div>
 
-    <script>
-        document.querySelectorAll('.delete-keyword').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const row = this.closest('tr');
-                const index = this.dataset.index;
+{#    <script>#}
+{#        document.querySelectorAll('.delete-keyword').forEach(btn => {#}
+{#            btn.addEventListener('click', function() {#}
+{#                const row = this.closest('tr');#}
 
-                row.style.display = 'none';
+{#                // Cache visuellement la ligne#}
+{#                row.style.display = 'none';#}
 
-                row.querySelectorAll('input').forEach(input => {
-                    input.disabled = true;
-                });
-            });
-        });
-    </script>
+{#                // Vide le champ text au lieu de désactiver#}
+{#                const textInput = row.querySelector('input[type="text"]');#}
+{#                if (textInput) {#}
+{#                    textInput.value = '';#}
+{#                }#}
+{#            });#}
+{#        });#}
+{#    </script>#}
 {% endif %}
