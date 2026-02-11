@@ -6,11 +6,11 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class AnalyzerControllerTest extends WebTestCase
 {
-    public function testAnalyzeWithValidAsin(): void
+    public function testFindKeywordsWithValidAsin(): void
     {
         $client = static::createClient();
 
-        $client->request('POST', '/analyze', [
+        $client->request('POST', '/find/keywords', [
             'asin' => 'B08N5WRWNW'
         ]);
 
@@ -24,11 +24,11 @@ class AnalyzerControllerTest extends WebTestCase
         echo "✅ Test réussi : réponse reçue sans erreur\n";
     }
 
-    public function testAnalyzeWithoutAsin(): void
+    public function testFindKeywordsWithoutAsin(): void
     {
         $client = static::createClient();
 
-        $client->request('POST', '/analyze');
+        $client->request('POST', '/find/keywords');
 
         $this->assertResponseIsSuccessful();
         $content = $client->getResponse()->getContent();

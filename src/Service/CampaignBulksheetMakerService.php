@@ -3,8 +3,6 @@
 namespace App\Service;
 
 use App\DTO\Bulksheet;
-use App\DTO\BulksheetFactory;
-use Symfony\Component\HttpFoundation\Request;
 
 class CampaignBulksheetMakerService
 {
