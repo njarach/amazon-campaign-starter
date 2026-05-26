@@ -1,3 +1,55 @@
-body {
-    background-color: skyblue;
+/* Alert */
+[role="alert"] {
+    padding: var(--pico-spacing);
+    border-radius: var(--pico-border-radius);
+    background-color: var(--pico-del-color);
+    color: #fff;
+    margin-bottom: var(--pico-spacing);
+}
+
+/* Results header */
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.results-header h4,
+.results-header p {
+    margin-bottom: 0;
+}
+
+/* Keyword row */
+.keyword-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem;
+    border: 1px solid var(--pico-border-color);
+    border-radius: var(--pico-border-radius);
+    margin-bottom: 0.5rem;
+}
+
+.keyword-index {
+    width: 2rem;
+    color: var(--pico-muted-color);
+    flex-shrink: 0;
+}
+
+.keyword-text {
+    flex: 2;
+}
+
+.keyword-score {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+.keyword-progress {
+    flex: 1;
+}
+
+.keyword-row input,
+.keyword-progress progress {
+    margin-bottom: 0;
 }

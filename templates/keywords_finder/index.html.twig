@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <article>
+        <h2>Trouver les mots clés</h2>
+
+        <form hx-post="{{ path('app_find_keywords') }}"
+              hx-target="#results"
+              hx-indicator="#loading">
+            <label for="asin">
+                Code ASIN
+                <input type="text"
+                       id="asin"
+                       name="asin"
+                       placeholder="Ex: B08N5WRWNW"
+                       required>
+                <small>Entrer l'ASIN de votre produit pour trouver les mots-clés associés sur Amazon.</small>
+            </label>
+
+            <button type="submit">Analyser</button>
+            <span id="loading" class="htmx-indicator">Découverte des mots clés en cours…</span>
+        </form>
+    </article>
+
+    <div id="results"></div>
+
+    <style>
+        .htmx-indicator { display: none; }
+        .htmx-request.htmx-indicator { display: inline; }
+    </style>
+{% endblock %}

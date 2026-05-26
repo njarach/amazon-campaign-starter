@@ -1,0 +1,47 @@
+{% if error is defined %}
+    <div role="alert">{{ error }}</div>
+{% else %}
+    <article>
+        <header>
+            <div class="results-header">
+                <div>
+                    <h4>Mots-clés pour votre campagne</h4>
+                    <p><small>{{ productsCount }} produits analysés</small></p>
+                </div>
+                <a href="{{ path('app_keywords_finder') }}" role="button" class="secondary outline">
+                    Nouveau produit
+                </a>
+            </div>
+        </header>
+
+        {{ form_start(form, {'action': path('app_create_bulksheet'), 'method': 'POST'}) }}
+
+        <div class="grid">
+            <div>{{ form_row(form.asin) }}</div>
+            <div>{{ form_row(form.sku) }}</div>
+            <div>{{ form_row(form.campaignId) }}</div>
+            <div>{{ form_row(form.autobid) }}</div>
+        </div>
+
+        <h5>Mots-clés découverts ({{ form.keywords|length }})</h5>
+
+        <div class="keywords-list">
+            {% for keyword in form.keywords %}
+                <div class="keyword-row" data-index="{{ loop.index0 }}">
+                    <span class="keyword-index">{{ loop.index }}</span>
+                    <div class="keyword-text">{{ form_widget(keyword.text) }}</div>
+                    <div class="keyword-score">{{ form_widget(keyword.score) }}</div>
+                    <div class="keyword-progress">
+                        <progress value="{{ keyword.score.vars.value }}" max="100"></progress>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div>
+            {{ form_widget(form.submit) }}
+        </div>
+
+        {{ form_end(form) }}
+    </article>
+{% endif %}
