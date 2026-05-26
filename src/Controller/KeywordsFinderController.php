@@ -17,7 +17,7 @@ final class KeywordsFinderController extends AbstractController
     #[Route('/finder', name: 'app_keywords_finder', methods: ['GET'])]
     public function home(): Response
     {
-        return $this->render('analyzer/index.html.twig');
+        return $this->render('keywords_finder/index.html.twig');
     }
 
     #[Route('/find/keywords', name: 'app_find_keywords', methods: ['POST'])]
@@ -26,7 +26,7 @@ final class KeywordsFinderController extends AbstractController
         $asin = $request->request->get('asin');
 
         if (!$asin) {
-            return $this->render('analyzer/_analyzer_results.html.twig', [
+            return $this->render('keywords_finder/_results.html.twig', [
                 'error' => 'Veuillez entrer un code ASIN.'
             ]);
         }
@@ -47,13 +47,13 @@ final class KeywordsFinderController extends AbstractController
 
             $form = $this->createForm(BulksheetType::class, $formData);
 
-            return $this->render('analyzer/_analyzer_results.html.twig', [
+            return $this->render('keywords_finder/_results.html.twig', [
                 'form' => $form->createView(),
                 'productsCount' => count($batchScrapedProductPages),
             ]);
 
         } catch (\Exception $e) {
-            return $this->render('analyzer/_analyzer_results.html.twig', [
+            return $this->render('keywords_finder/_results.html.twig', [
                 'error' => 'Erreur: ' . $e->getMessage()
             ]);
         }
