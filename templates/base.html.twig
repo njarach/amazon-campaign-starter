@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Amazon Keyword Analyzer{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    {{ importmap('app') }}
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
@@ -16,15 +15,11 @@
         </ul>
         <ul>
             {% if app.user %}
-                {% set total = app.user.freeUsesRemaining + app.user.paidUsesRemaining %}
+
                 <li>
                     <small>
                         {{ app.user.email }}
                         &nbsp;·&nbsp;
-                        <strong>{{ total }}</strong> utilisation{{ total != 1 ? 's' : '' }} restante{{ total != 1 ? 's' : '' }}
-                        {% if total == 0 %}
-                            &nbsp;— <a href="{{ path('app_billing') }}">Recharger</a>
-                        {% endif %}
                     </small>
                 </li>
                 <li>
