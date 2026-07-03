@@ -12,7 +12,27 @@
 <header>
     <nav class="container">
         <ul>
-            <li><strong>Adlance - Kickstart Your Amazon Ads</strong></li>
+            <li><strong>Adlance — Kickstart Your Amazon Ads</strong></li>
+        </ul>
+        <ul>
+            {% if app.user %}
+                {% set total = app.user.freeUsesRemaining + app.user.paidUsesRemaining %}
+                <li>
+                    <small>
+                        {{ app.user.email }}
+                        &nbsp;·&nbsp;
+                        <strong>{{ total }}</strong> utilisation{{ total != 1 ? 's' : '' }} restante{{ total != 1 ? 's' : '' }}
+                        {% if total == 0 %}
+                            &nbsp;— <a href="{{ path('app_billing') }}">Recharger</a>
+                        {% endif %}
+                    </small>
+                </li>
+                <li>
+                    <a href="{{ path('app_logout') }}" role="button" class="outline secondary">
+                        Déconnexion
+                    </a>
+                </li>
+            {% endif %}
         </ul>
     </nav>
 </header>

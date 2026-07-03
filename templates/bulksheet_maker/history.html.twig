@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes bulksheets — Adlance{% endblock %}
+
+{% block body %}
+<h2>Mes bulksheets</h2>
+
+{% if records is empty %}
+    <p>Aucune bulksheet générée pour l'instant. <a href="{{ path('app_keywords_finder') }}">Lancer une analyse</a>.</p>
+{% else %}
+    <figure>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>ASIN</th>
+                    <th>Campagne</th>
+                    <th>Mots-clés</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.createdAt|date('d/m/Y H:i') }}</td>
+                    <td><code>{{ record.asin }}</code></td>
+                    <td>{{ record.campaignId }}</td>
+                    <td>{{ record.keywords|length }}</td>
+                    <td>
+                        <a href="{{ path('app_history_download', {id: record.id}) }}" role="button" class="outline">
+                            Télécharger
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+{% endif %}
+{% endblock %}

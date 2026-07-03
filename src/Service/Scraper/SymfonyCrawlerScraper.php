@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Scraper;
 
 use Symfony\Component\BrowserKit\HttpBrowser;
 use Symfony\Component\DomCrawler\Crawler;
@@ -82,9 +82,7 @@ class SymfonyCrawlerScraper implements ScraperInterface
                 }
 
                 $results[] = [$text];
-
             } catch (\Exception $e) {
-                echo "⚠️  Erreur sur $url - skipping: " . $e->getMessage() . "\n";
                 continue;
             }
         }

@@ -2,6 +2,8 @@
 
 namespace App\Service;
 
+use App\Service\Scraper\ScraperInterface;
+
 class AmazonScraperService
 {
     public function __construct(

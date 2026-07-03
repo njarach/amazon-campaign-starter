@@ -1,10 +1,8 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Scraper;
 
-use App\Service\ScraperInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-
 
 class FirecrawlScraper implements ScraperInterface
 {
@@ -82,7 +80,6 @@ class FirecrawlScraper implements ScraperInterface
                 ]);
 
                 if ($response->getStatusCode() === 500) {
-                    echo "⚠️  500 error on $url - skipping\n";
                     continue;
                 }
 
@@ -91,7 +88,6 @@ class FirecrawlScraper implements ScraperInterface
 
                 sleep(2);
             } catch (\Exception $e) {
-                echo "⚠️  Erreur sur $url - skipping\n";
                 continue;
             }
         }
