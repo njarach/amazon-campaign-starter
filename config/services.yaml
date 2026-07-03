@@ -15,12 +15,12 @@ services:
             - '../src/Kernel.php'
 
     # Chose which scraper does its job here
-    App\Service\ScraperInterface:
+    App\Service\Scraper\ScraperInterface:
         alias: App\Service\SymfonyCrawlerScraper
         # Use Firecrawl :
         # alias: App\Service\Scraper\FirecrawlScraper
 
-    App\Service\FirecrawlScraper:
+    App\Service\Scraper\FirecrawlScraper:
         arguments:
             $apiKey: '%firecrawl.api_key%'
 
