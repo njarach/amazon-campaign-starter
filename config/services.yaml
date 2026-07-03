@@ -16,7 +16,7 @@ services:
 
     # Chose which scraper does its job here
     App\Service\Scraper\ScraperInterface:
-        alias: App\Service\Scraper\SymfonyCrawlerScraper
+        alias: App\Service\SymfonyCrawlerScraper
         # Use Firecrawl :
         # alias: App\Service\Scraper\FirecrawlScraper
 
