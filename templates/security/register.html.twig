@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un compte — Adlance{% endblock %}
+
+{% block body %}
+<article style="max-width: 400px; margin: 4rem auto;">
+    <header>
+        <h2>Créer un compte</h2>
+        <p><small>2 analyses offertes à l'inscription.</small></p>
+    </header>
+
+    {% if error %}
+        <p role="alert" style="color: var(--pico-color-red-500);">{{ error }}</p>
+    {% endif %}
+
+    <form method="post">
+        <label for="email">Email
+            <input type="email" id="email" name="email" required autofocus>
+        </label>
+        <label for="password">Mot de passe <small>(8 caractères minimum)</small>
+            <input type="password" id="password" name="password" minlength="8" required>
+        </label>
+        <button type="submit">Créer mon compte</button>
+    </form>
+
+    <footer>
+        <small>Déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></small>
+    </footer>
+</article>
+{% endblock %}
