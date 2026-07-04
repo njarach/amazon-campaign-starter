@@ -16,7 +16,11 @@
         </ul>
         <ul>
             {% if app.user %}
-
+                <li>
+                    <a href="{{ path('app_history') }}">
+                        Historique
+                    </a>
+                </li>
                 <li>
                     <small>
                         {{ app.user.email }}
