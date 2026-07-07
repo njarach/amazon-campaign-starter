@@ -18,14 +18,9 @@
             </label>
 
             <button type="submit">Analyser</button>
-            <span id="loading" class="htmx-indicator">Découverte des mots clés en cours…</span>
+            <span id="loading" class="htmx-indicator">Découverte des mots clés en cours…<progress /></span>
         </form>
     </article>
 
     <div id="results"></div>
-
-    <style>
-        .htmx-indicator { display: none; }
-        .htmx-request.htmx-indicator { display: inline; }
-    </style>
 {% endblock %}

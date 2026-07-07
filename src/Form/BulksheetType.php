@@ -26,7 +26,7 @@ class BulksheetType extends AbstractType
             ])
             ->add('sku', TextType::class, [
                 'label' => 'SKU',
-                'required' => false,
+                'required' => true,
                 'attr' => ['class' => 'form-control-plaintext'],
             ])
             ->add('campaignId', TextType::class, [

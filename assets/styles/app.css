@@ -53,3 +53,6 @@
 .keyword-progress progress {
     margin-bottom: 0;
 }
+
+.htmx-indicator { display: none; }
+.htmx-request.htmx-indicator { display: inline; }
