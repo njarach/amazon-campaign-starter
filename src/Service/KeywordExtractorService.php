@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -13,6 +14,7 @@ readonly class KeywordExtractorService
 {
     public function __construct(
         private HttpClientInterface $httpClient,
+        private LoggerInterface     $logger,
         private string              $openaiApiKey
     ) {}
 
@@ -24,23 +26,40 @@ readonly class KeywordExtractorService
         return $this->promptGipidyForKeywords($prompt);
     }
 
-    public function askGipidyForTheKeywords(string $productTitle, array $batchScrapedProductPages)
+    public function askGipidyForTheKeywords(string $productTitle, array $batchScrapedProductPages): array
     {
         $productsJson = json_encode($batchScrapedProductPages, JSON_UNESCAPED_UNICODE);
-        $prompt = "Tu es un expert Amazon Ads. Tu dois me trouver 20 mots-clé exactement sans nom de marque pour ces produits dont je te donne les titres et
-        descriptions : $productsJson.
-        Réponds UNIQUEMENT avec un JSON : {\"mot-clé\": score_pertinence}
-        Score de 1 à 100 (100 = très pertinent pour Amazon Ads).
-        Trie par score décroissant. Ce score est basé sur la fréquence des mots utilisés sur la page des produits. Des mots clés similaires ont le même score.
-        CRITÈRES :
-        - Mots-clé que les acheteurs tapent réellement sur Amazon, dans la barre de recherche,
-        - Commence avec des mots clés génériques utilisés notamment dans le titre du produit : $productTitle,
-        - Poursuis par des mots-clé très génériques et communs utilisés pour le type de produit,
-        - Termes de recherche à fort potentiel de conversion,
-        - Évite les mots de liaison tels que 'et','pour','avec',
-        - Utilise quelques données techniques selon les produits si présentes dans le titre ou la description : dimensions, performances.";
 
-        return $this->promptGipidyForKeywords($prompt);
+        $prompt = <<<PROMPT
+        Contexte : titre du produit principal = "$productTitle".
+        Titres et descriptions des produits concurrents scrapés (JSON) : $productsJson
+
+        Tâche : identifie EXACTEMENT 20 mots-clés pour une campagne Amazon Ads Sponsored Products.
+
+        Règles à suivre dans l'ordre :
+        1. Un mot-clé = ce qu'un acheteur taperait réellement dans la barre de recherche Amazon (pas une phrase de description).
+        2. Exclus les noms de marque.
+        3. Exclus les mots de liaison seuls ("et", "pour", "avec"...).
+        4. Classe du plus générique (proche du titre du produit) au plus spécifique (variante technique : dimension, matière, usage).
+        5. N'invente pas de mot-clé absent du contexte fourni (titres/descriptions ci-dessus) : reformule ou combine des termes qui y apparaissent réellement.
+        6. Le score de pertinence (1 à 100) reflète la fréquence d'apparition du terme (ou d'un synonyme proche) dans le JSON fourni, pas une estimation générale du marché.
+
+        Exemple de format attendu (valeurs fictives, ne pas les réutiliser) :
+        {"gourde isotherme": 95, "bouteille inox 500ml": 80, "gourde sport": 62}
+
+        Réponds UNIQUEMENT avec un objet JSON de 20 paires clé/valeur, trié par score décroissant. Aucun texte hors JSON.
+        PROMPT;
+
+        $keywords = $this->promptGipidyForKeywords($prompt);
+
+        if (count($keywords) !== 20) {
+            $this->logger->warning('KeywordExtractor: nombre de mots-clés inattendu', [
+                'expected' => 20,
+                'actual' => count($keywords),
+            ]);
+        }
+
+        return $keywords;
     }
 
     /**
@@ -69,15 +88,25 @@ readonly class KeywordExtractorService
                     ['role' => 'user', 'content' => $prompt]
                 ],
                 'temperature' => 0.2,
-                'max_tokens' => 800,
+                'max_tokens' => 1500,
+                'response_format' => ['type' => 'json_object'],
             ]
         ]);
 
         $data = $response->toArray();
-        $content = $data['choices'][0]['message']['content'];
+        $content = $data['choices'][0]['message']['content'] ?? '';
 
-        $content = preg_replace('/```json\n?|\n?```/', '', $content);
+        $decoded = json_decode(trim($content), true);
 
-        return json_decode(trim($content), true) ?? [];
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->logger->error('KeywordExtractor: réponse OpenAI non parsable en JSON', [
+                'raw_content' => $content,
+                'json_error' => json_last_error_msg(),
+            ]);
+
+            return [];
+        }
+
+        return $decoded ?? [];
     }
 }
