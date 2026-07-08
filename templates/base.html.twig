@@ -5,17 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Amazon Keyword Finder{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.colors.min.css"
+    >
     {{ importmap('app') }}
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
 </head>
 <body>
 <header>
-    <nav class="container">
+    <nav class="container-fluid">
         <ul>
             <li><strong>Adlance — Démarrez vos campagnes Amazon Ads</strong></li>
         </ul>
         <ul>
             {% if app.user %}
+                <li>
+                    <small>
+                        {{ app.user.email }}
+                    </small>
+                </li>
+                <li>
+                    <a href="{{ path('app_keywords_finder') }}">
+                        Finder
+                    </a>
+                </li>
                 <li>
                     <a href="{{ path('app_history') }}">
                         Historique
@@ -29,11 +43,6 @@
                     </li>
                 {% endif %}
                 <li>
-                    <small>
-                        {{ app.user.email }}
-                    </small>
-                </li>
-                <li>
                     <a href="{{ path('app_logout') }}" role="button" class="outline secondary">
                         Déconnexion
                     </a>
@@ -43,7 +52,15 @@
     </nav>
 </header>
 
-<main class="container">
+<main class="container-fluid">
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="{{ label == 'success' ? 'pico-color-green-500' : (label == 'danger' ? 'pico-color-red-500' : '') }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     {% block body %}{% endblock %}
 </main>
 </body>

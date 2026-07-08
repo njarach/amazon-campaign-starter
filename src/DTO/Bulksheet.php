@@ -5,7 +5,6 @@ namespace App\DTO;
 class Bulksheet
 {
     private array $keywords;
-    private array $frequency;
     private float $autobid;
     private string $campaignId;
     private string $asin;
@@ -35,16 +34,6 @@ class Bulksheet
     public function setKeywords(array $keywords): void
     {
         $this->keywords = $keywords;
-    }
-
-    public function getFrequency(): array
-    {
-        return $this->frequency;
-    }
-
-    public function setFrequency(array $frequency): void
-    {
-        $this->frequency = $frequency;
     }
 
     public function getAutobid(): float

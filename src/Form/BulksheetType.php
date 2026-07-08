@@ -28,6 +28,10 @@ class BulksheetType extends AbstractType
                 'label' => 'SKU',
                 'required' => true,
                 'attr' => ['class' => 'form-control-plaintext'],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\Length(max: 100)
+                ]
             ])
             ->add('campaignId', TextType::class, [
                 'label' => 'Campaign ID',

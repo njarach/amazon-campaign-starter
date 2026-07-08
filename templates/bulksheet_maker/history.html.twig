@@ -27,9 +27,17 @@
                     <td>{{ record.campaignId }}</td>
                     <td>{{ record.keywords|length }}</td>
                     <td>
+                        <a href="{{ path('app_history_show', {id: record.id}) }}" role="button" class="outline">Voir</a>
                         <a href="{{ path('app_history_download', {id: record.id}) }}" role="button" class="outline">
                             Télécharger
                         </a>
+                        <form method="post" action="{{ path('app_history_delete', {id: record.id}) }}" style="display: inline-block; margin: 0;"
+                              onsubmit="return confirm('Confirmer la suppression ?')">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ record.id) }}">
+                            <button type="submit" role="button" class="outline pico-color-red-500" style="margin: 0;">
+                                Supprimer</button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}

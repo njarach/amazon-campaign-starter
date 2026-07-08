@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="grid">
+        <h2>{{ record.id }} - {{ record.asin }} - {{ record.createdAt|date('d-m-Y') }}</h2>
+        <div>
+            <a href="{{ path('app_history_download', {id:record.id}) }}" role="button" class="outline">Télécharger</a>
+            <form method="post" action="{{ path('app_history_delete', {id: record.id}) }}" style="display: inline-block; margin: 0;"
+                  onsubmit="return confirm('Confirmer la suppression ?')">
+                <input type="hidden" name="_method" value="DELETE">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ record.id) }}">
+                <button type="submit" role="button" class="outline pico-color-red-500" style="margin: 0;">
+                    Supprimer</button>
+            </form>
+        </div>
+    </div>
+
+    {% if record.keywords is empty %}
+        Aucun mot clé enregistré pour cette sheet.
+    {% else %}
+
+        <table>
+            <thead>
+            <tr>
+                <th>ASIN</th>
+                <th>SKU</th>
+                <th>CampaignId</th>
+                <th>Autobid</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ record.asin }}</td>
+                <td>{{ record.sku }}</td>
+                <td>{{ record.campaignId }}</td>
+                <td>{{ record.autobid }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <figure>
+            <h5>Mots clés</h5>
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Mot-clé</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for keyword in record.keywords %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ keyword }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </figure>
+    {% endif %}
+{% endblock %}
+
+{% block title %}
+
+{% endblock %}
+

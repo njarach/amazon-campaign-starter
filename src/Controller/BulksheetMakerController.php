@@ -68,6 +68,25 @@ final class BulksheetMakerController extends AbstractController
         ]);
     }
 
+    #[Route('/history/{id}', name: 'app_history_show', methods: ['GET'])]
+    public function show(BulksheetRecord $record): Response
+    {
+        return $this->render('bulksheet_maker/show.html.twig', [
+            'record' => $record,
+        ]);
+    }
+
+    #[Route('/history/delete/{id}', name: 'app_history_delete', methods: ['DELETE'])]
+    public function delete(Request $request, BulksheetRecord $record, EntityManagerInterface $em): Response
+    {
+        if ($this->isCsrfTokenValid('delete' . $record->getId(), $request->request->get('_token'))) {
+            $em->remove($record);
+            $em->flush();
+        }
+        $this->addFlash('success', 'Entrée supprimée.');
+        return $this->redirectToRoute('app_history');
+    }
+
     #[Route('/history/{id}/download', name: 'app_history_download', methods: ['GET'])]
     public function download(BulksheetRecord $record): Response
     {

@@ -29,6 +29,12 @@ class BulksheetRecord
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    #[ORM\Column(length: 100, nullable: true)]
+    private ?string $sku = null;
+
+    #[ORM\Column]
+    private ?float $autobid = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -86,5 +92,29 @@ class BulksheetRecord
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    public function getSku(): ?string
+    {
+        return $this->sku;
+    }
+
+    public function setSku(?string $sku): static
+    {
+        $this->sku = $sku;
+
+        return $this;
+    }
+
+    public function getAutobid(): ?float
+    {
+        return $this->autobid;
+    }
+
+    public function setAutobid(float $autobid): static
+    {
+        $this->autobid = $autobid;
+
+        return $this;
     }
 }
