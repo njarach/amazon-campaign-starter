@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Utilisateurs — Adlance{% endblock %}
+
+{% block body %}
+<h2>Utilisateurs</h2>
+
+{% if users is empty %}
+    <p>Aucun utilisateur.</p>
+{% else %}
+    <figure>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Rôles</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td>{{ u.id }}</td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.roles|join(', ') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </figure>
+{% endif %}
+{% endblock %}

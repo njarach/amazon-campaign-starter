@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -23,6 +24,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column]
     private string $password;
+
+    #[ORM\Column(type: Types::JSON)]
+    private array $roles = [];
 
     public function getId(): ?int
     {
@@ -60,6 +64,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        return ['ROLE_USER'];
+        return array_values(array_unique([...$this->roles, 'ROLE_USER']));
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+        return $this;
     }
 }

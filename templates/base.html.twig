@@ -21,6 +21,13 @@
                         Historique
                     </a>
                 </li>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li>
+                        <a href="{{ path('app_admin_users') }}">
+                            Utilisateurs
+                        </a>
+                    </li>
+                {% endif %}
                 <li>
                     <small>
                         {{ app.user.email }}
