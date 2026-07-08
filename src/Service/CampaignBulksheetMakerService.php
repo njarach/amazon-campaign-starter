@@ -3,6 +3,8 @@
 namespace App\Service;
 
 use App\DTO\Bulksheet;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class CampaignBulksheetMakerService
 {
@@ -143,23 +145,21 @@ class CampaignBulksheetMakerService
         ];
     }
 
-    public function exportToCsv(Bulksheet $bulksheet, string $filepath): void
+    public function exportToXlsx(Bulksheet $bulksheet, string $filepath): void
     {
-        $handle = fopen($filepath, 'w');
-
         $rows = $bulksheet->getRows();
-
         if (empty($rows)) {
-            fclose($handle);
             return;
         }
 
-        fputcsv($handle, array_keys($rows[0]));
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
 
-        foreach ($rows as $row) {
-            fputcsv($handle, array_values($row));
-        }
+        $sheet->fromArray(array_keys($rows[0]), null, 'A1');
 
-        fclose($handle);
+        $sheet->fromArray(array_map('array_values', $rows), null, 'A2');
+
+        $writer = new Xlsx($spreadsheet);
+        $writer->save($filepath);
     }
 }

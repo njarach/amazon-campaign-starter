@@ -53,8 +53,9 @@ final class KeywordsFinderController extends AbstractController
             ]);
 
         } catch (\Exception $e) {
+            // TODO log stuff probably
             return $this->render('keywords_finder/_results.html.twig', [
-                'error' => 'Erreur: ' . $e->getMessage()
+                'error' => 'Erreur: une erreur inattendue s\'est produite.'
             ]);
         }
     }

@@ -47,14 +47,16 @@ final class BulksheetMakerController extends AbstractController
         $record->setUser($user);
         $record->setAsin($data['asin']);
         $record->setCampaignId($data['campaignId']);
+        $record->setAutobid((float) $data['autobid']);
+        $record->setSku($data['sku'] ?? '');
         $record->setKeywords($keywords);
         $em->persist($record);
         $em->flush();
 
-        $filepath = $this->getParameter('kernel.project_dir') . '/var/tmp/amazon_campaign.csv';
-        $this->bulksheetMakerService->exportToCsv($bulksheet, $filepath);
+        $filepath = $this->getParameter('kernel.project_dir') . '/var/tmp/amazon_campaign.xlsx';
+        $this->bulksheetMakerService->exportToXlsx($bulksheet, $filepath);
 
-        return $this->file($filepath, 'adlance_campaign_' . date('Ymd_His') . '.csv');
+        return $this->file($filepath, 'adlance_campaign_' . date('Ymd_His') . '.xlsx');
     }
 
     #[Route('/history', name: 'app_history', methods: ['GET'])]
@@ -107,7 +109,7 @@ final class BulksheetMakerController extends AbstractController
         $bulksheet = $this->bulksheetMakerService->generateCampaigns($bulksheet);
 
         $filepath = $this->getParameter('kernel.project_dir') . '/var/tmp/amazon_campaign.csv';
-        $this->bulksheetMakerService->exportToCsv($bulksheet, $filepath);
+        $this->bulksheetMakerService->exportToXlsx($bulksheet, $filepath);
 
         return $this->file($filepath, 'adlance_campaign_' . $record->getAsin() . '.csv');
     }
